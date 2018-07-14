@@ -1,0 +1,73 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 27
+    defaultConfig {
+        applicationId "com.plumya.pricefy"
+        minSdkVersion 14
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    configurations.all {
+        resolutionStrategy.force 'com.google.code.findbugs:jsr305:1.3.9'
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "com.android.support:appcompat-v7:$rootProject.supportVersion"
+    implementation "com.android.support:recyclerview-v7:$rootProject.supportVersion"
+    implementation "com.android.support:cardview-v7:$rootProject.supportVersion"
+    implementation "com.android.support:design:$rootProject.supportVersion"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+
+    // Architecture components dependencies
+    implementation "android.arch.persistence.room:runtime:$rootProject.roomVersion"
+    annotationProcessor "android.arch.persistence.room:compiler:$rootProject.roomVersion"
+    implementation "android.arch.lifecycle:runtime:$rootProject.archVersion"
+    implementation "android.arch.lifecycle:extensions:$rootProject.archVersion"
+    annotationProcessor "android.arch.lifecycle:compiler:$rootProject.archVersion"
+
+    // Square dependencies
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation "com.jakewharton:butterknife:$rootProject.butterKnifeVersion"
+    annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterKnifeVersion"
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
+
+    // Local db
+    debugImplementation 'com.facebook.stetho:stetho:1.5.0'
+
+//    implementation 'com.android.support:multidex:1.0.3'
+
+    // Google Vision API dependencies
+    implementation 'com.google.api-client:google-api-client-android:1.23.0' exclude module: 'httpclient'
+    implementation 'com.google.http-client:google-http-client-gson:1.23.0' exclude module: 'httpclient'
+    implementation 'com.google.apis:google-api-services-vision:v1-rev369-1.23.0'
+
+    // Test dependencies
+    testImplementation 'junit:junit:4.12'
+
+    androidTestImplementation "com.android.support:support-annotations:$rootProject.supportVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.espressoVersion"
+    androidTestImplementation "com.android.support.test.espresso:espresso-intents:$rootProject.espressoVersion"
+    implementation "com.android.support.test.espresso:espresso-idling-resource:$rootProject.espressoVersion"
+    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:$rootProject.espressoVersion") {
+        // Necessary to avoid version conflicts
+        exclude group: 'com.android.support', module: 'appcompat'
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'support-annotations'
+        exclude module: 'recyclerview-v7'
+    }
+    androidTestImplementation "com.android.support.test:rules:$rootProject.supportTestVersion"
+    androidTestImplementation "com.android.support.test:runner:$rootProject.supportTestVersion"
+}
