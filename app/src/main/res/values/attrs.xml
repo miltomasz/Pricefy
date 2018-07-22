@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ProgressCircleView">
+        <attr name="pricefy_progressThickness" format="float" />
+        <attr name="pricefy_progressColor" format="color" />
+        <attr name="pricefy_backgroundColor" format="color" />
+        <attr name="pricefy_maxProgress" format="integer" />
+        <attr name="pricefy_progress" format="integer" />
+    </declare-styleable>
+</resources>

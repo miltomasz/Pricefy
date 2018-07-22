@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Pricefy</string>
+    <string name="no_camera_app_error">No camera app installed</string>
+    <string name="could_not_take_pic_error">Could not take picture!</string>
+    <string name="could_not_process_image_error">Could not process picture!</string>
+    <string name="camera_permissions_error">Camera Permissions denied</string>
+    <string name="no_image_captured">No image captured</string>
 </resources>
