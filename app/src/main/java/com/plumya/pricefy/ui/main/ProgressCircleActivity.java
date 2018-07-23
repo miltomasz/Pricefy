@@ -37,7 +37,7 @@ import java.util.List;
 
 public class ProgressCircleActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "AIzaSyDcusOmzydK7WdJS3pONSnCPL67KkB5pow";
+    private static final String CLOUD_VISION_API_KEY = "";
     public static final String PROCESSING_RESULT = "processedResult";
     public static final String IMAGE_ID = "imageId";
     public static final String LOG_TAG = ProgressCircleActivity.class.getSimpleName();
