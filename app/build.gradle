@@ -47,6 +47,7 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
 
     // Local db
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
