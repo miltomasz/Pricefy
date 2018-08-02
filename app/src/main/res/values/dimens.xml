@@ -3,4 +3,14 @@
 
     <dimen name="app_bar_elevation">4dp</dimen>
     <dimen name="date_size">10sp</dimen>
+
+    <dimen name="fab_elevation">2dp</dimen>
+    <dimen name="fab_press_translation_z">6dp</dimen>
+    <dimen name="fab_margin">24dp</dimen>
+    <dimen name="base_margin_detail_view">8dp</dimen>
+    <dimen name="big_margin_detail_view">16dp</dimen>
+    <dimen name="app_bar_detail_view_height">250dp</dimen>
+    <dimen name="card_view_radius">4dp</dimen>
+    <dimen name="large_margin_detail_view">32dp</dimen>
+
 </resources>

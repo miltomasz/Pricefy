@@ -8,12 +8,13 @@ import android.content.Context;
 import android.util.Log;
 
 import com.plumya.pricefy.data.local.model.Image;
+import com.plumya.pricefy.data.local.model.WebsiteItem;
 
 /**
  * Created by miltomasz on 19/07/18.
  */
 
-@Database(entities = {Image.class}, version = 2)
+@Database(entities = {Image.class, WebsiteItem.class}, version = 5)
 @TypeConverters(Converters.class)
 public abstract class PricefyDatabase extends RoomDatabase {
 
@@ -40,4 +41,6 @@ public abstract class PricefyDatabase extends RoomDatabase {
 
     // The associated DAOs for the database
     public abstract ImageDao imageDao();
+
+    public abstract WebsiteItemDao websiteItemDao();
 }

@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -28,7 +29,9 @@ import android.widget.TextView;
 
 import com.plumya.pricefy.R;
 import com.plumya.pricefy.data.local.model.Image;
+import com.plumya.pricefy.data.network.NetworkDataSource;
 import com.plumya.pricefy.di.Injector;
+import com.plumya.pricefy.ui.results.ResultsActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,9 +43,10 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ImagesAdapter.ImageOnClickHandler {
 
     public static final String PHOTO_PATH_EXTRA = "photoPath";
+    public static final String IMAGE_ID = "imageId";
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -58,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.imagesRv) RecyclerView imagesRv;
     @BindView(R.id.progressBar) ProgressBar progressBar;
     @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.coordinatorLayout) CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         imagesRv.setLayoutManager(layoutManager);
         imagesRv.setHasFixedSize(true);
-        imagesAdapter = new ImagesAdapter(this, new ArrayList<>());
+        imagesAdapter = new ImagesAdapter(this, new ArrayList<>(), this);
         imagesRv.setAdapter(imagesAdapter);
         DividerItemDecoration dividerItemDecoration =
                 new DividerItemDecoration(imagesRv.getContext(), layoutManager.getOrientation());
@@ -128,11 +133,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void takePicture() {
         Log.d(LOG_TAG, "Start taking picture");
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+            && ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
             && ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(
                     this,
-                    new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
+                    new String[] {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA},
                     REQUEST_CAMERA_PERMISSION
             );
         } else {
@@ -147,12 +153,9 @@ public class MainActivity extends AppCompatActivity {
             processTakenImageIntent.putExtra(PHOTO_PATH_EXTRA, currentPhotoPath);
             startActivityForResult(processTakenImageIntent, REQUEST_IMAGE_PROCESSING);
         } else if (requestCode == REQUEST_IMAGE_PROCESSING) {
-            if (resultCode == RESULT_OK) {
-                long imageId = data.getLongExtra(ProgressCircleActivity.IMAGE_ID, -1);
-                // load from db list of taken images
-            } else  {
+            if (resultCode != RESULT_OK) {
                 Snackbar
-                        .make(getCurrentFocus(), R.string.could_not_process_image_error, Snackbar.LENGTH_LONG)
+                        .make(coordinatorLayout, R.string.could_not_process_image_error, Snackbar.LENGTH_LONG)
                         .show();
             }
         }
@@ -164,13 +167,14 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case REQUEST_CAMERA_PERMISSION: {
-                if (grantResults.length > 1
+                if (grantResults.length > 2
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
                     launchCamera();
                 } else {
                     Snackbar
-                            .make(getCurrentFocus(), R.string.camera_permissions_error, Snackbar.LENGTH_LONG)
+                            .make(coordinatorLayout, R.string.camera_permissions_error, Snackbar.LENGTH_LONG)
                             .show();
                 }
             }
@@ -179,15 +183,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void launchCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
             File photoFile = null;
             try {
                 photoFile = createImageFile();
                 currentPhotoPath = photoFile.getAbsolutePath();
             } catch (IOException ex) {
-                // Error occurred while creating the File
+                Log.e(LOG_TAG, "Exception occurred while creating photo path: " + ex.getMessage());
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -196,12 +198,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             } else {
                 Snackbar
-                        .make(getCurrentFocus(), R.string.could_not_take_pic_error, Snackbar.LENGTH_LONG)
+                        .make(coordinatorLayout, R.string.could_not_take_pic_error, Snackbar.LENGTH_LONG)
                         .show();
             }
         } else {
             Snackbar
-                    .make(getCurrentFocus(), R.string.no_camera_app_error, Snackbar.LENGTH_LONG)
+                    .make(coordinatorLayout, R.string.no_camera_app_error, Snackbar.LENGTH_LONG)
                     .show();
         }
     }
@@ -215,5 +217,13 @@ public class MainActivity extends AppCompatActivity {
         // Save a file: path for use with ACTION_VIEW intents
         currentPhotoPath = image.getAbsolutePath();
         return image;
+    }
+
+    @Override
+    public void onClick(Image image) {
+        Intent intent = new Intent(this, ResultsActivity.class);
+        intent.putExtra(IMAGE_ID, image.getId());
+        intent.putExtra(NetworkDataSource.PARAMS, image.getLabels());
+        startActivity(intent);
     }
 }

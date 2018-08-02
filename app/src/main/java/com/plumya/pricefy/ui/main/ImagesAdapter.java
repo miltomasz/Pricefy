@@ -30,11 +30,13 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
     private static final int TARGET_HEIGHT = 240;
 
     private Context context;
+    private ImageOnClickHandler clickHandler;
     private List<Image> images;
 
-    public ImagesAdapter(Context context, List<Image> images) {
+    public ImagesAdapter(Context context, List<Image> images, ImageOnClickHandler clickHandler) {
         this.context = context;
         this.images = images;
+        this.clickHandler = clickHandler;
     }
 
     @NonNull
@@ -69,7 +71,7 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         notifyDataSetChanged();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public  class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         @BindView(R.id.imageView)
         ImageView imageView;
         @BindView(R.id.labelsTv)
@@ -80,6 +82,18 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         public ViewHolder(View v) {
             super(v);
             ButterKnife.bind(this, v);
+            v.setOnClickListener(this);
         }
+
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Image image = images.get(position);
+            clickHandler.onClick(image);
+        }
+    }
+
+    public interface ImageOnClickHandler {
+        void onClick(Image image);
     }
 }

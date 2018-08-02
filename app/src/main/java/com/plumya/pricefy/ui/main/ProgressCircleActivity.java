@@ -7,6 +7,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.HttpTransport;
@@ -31,34 +32,41 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by miltomasz on 15/07/18.
  */
 
 public class ProgressCircleActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyDcusOmzydK7WdJS3pONSnCPL67KkB5pow";
     public static final String PROCESSING_RESULT = "processedResult";
     public static final String IMAGE_ID = "imageId";
     public static final String LOG_TAG = ProgressCircleActivity.class.getSimpleName();
 
     private PricefyRepository repository;
 
+    @BindView(R.id.progressText) TextView progressText;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progress_circle);
+        ButterKnife.bind(this);
 
         repository = Injector.provideRepository(getApplicationContext());
 
         Intent intent = getIntent();
         if (intent.hasExtra(MainActivity.PHOTO_PATH_EXTRA)) {
             String photoPath = intent.getStringExtra(MainActivity.PHOTO_PATH_EXTRA);
+            progressText.setText("Compressing image..");
             new ImageRecognitionTask(this).execute(photoPath);
         }
     }
 
-    private class ImageRecognitionTask extends AsyncTask<String, Void, Long> {
+    private class ImageRecognitionTask extends AsyncTask<String, String, Long> {
 
         private static final int QUALITY = 75;
         private Activity activity;
@@ -70,11 +78,17 @@ public class ProgressCircleActivity extends AppCompatActivity {
         @Override
         protected Long doInBackground(String... params) {
             String photoPath = params[0];
+            if (photoPath == null) {
+                Log.e(LOG_TAG, "Photo path is null");
+                return null;
+            }
 
             Bitmap bitmap = BitmapUtil.resamplePic(activity, photoPath);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.WEBP, QUALITY, byteArrayOutputStream);
             byte[] imageBytes = byteArrayOutputStream.toByteArray();
+
+            publishProgress(new String[] {"Recognizing image.."});
 
             Image base64EncodedImage = new Image();
             base64EncodedImage.encodeContent(imageBytes);
@@ -115,6 +129,7 @@ public class ProgressCircleActivity extends AppCompatActivity {
             }
             List<AnnotateImageResponse> responses = response.getResponses();
             if (responses.size() > 0) {
+                publishProgress(new String[] {"Saving image.."});
                 AnnotateImageResponse annotateImageResponse = responses.get(0);
                 String labels = VisionModelMapper.mapLabels(annotateImageResponse);
                 com.plumya.pricefy.data.local.model.Image image =
@@ -127,6 +142,11 @@ public class ProgressCircleActivity extends AppCompatActivity {
                 }
             }
             return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... progress) {
+            progressText.setText(progress[0]);
         }
 
         @Override
