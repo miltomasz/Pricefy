@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 
 import com.plumya.pricefy.data.PricefyRepository;
 import com.plumya.pricefy.data.local.model.WebsiteItem;
+import com.plumya.pricefy.data.network.model.WebsiteItemModel;
 
 import java.util.List;
 
@@ -19,9 +20,11 @@ class ResultsActivityViewModel extends ViewModel {
 
     private final PricefyRepository repository;
     private MutableLiveData<List<WebsiteItem>> websiteItemsLiveData = new MutableLiveData<>();
+    private SingleLiveEvent<WebsiteItemModel> websiteItemModelErrors;
 
     public ResultsActivityViewModel(PricefyRepository repository) {
         this.repository = repository;
+        this.websiteItemModelErrors = repository.getWebsiteItemsErrors();
     }
 
     public void setImageParameters(long imageId, String params) {
@@ -38,5 +41,9 @@ class ResultsActivityViewModel extends ViewModel {
 
     public LiveData<List<WebsiteItem>> getWebsiteItems() {
         return websiteItemsLiveData;
+    }
+
+    public SingleLiveEvent<WebsiteItemModel> getWebsiteItemModelErrors() {
+        return websiteItemModelErrors;
     }
 }

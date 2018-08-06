@@ -3,10 +3,13 @@ package com.plumya.pricefy.ui.detail;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +27,7 @@ import com.plumya.pricefy.R;
 import com.plumya.pricefy.data.local.model.WebsiteItem;
 import com.plumya.pricefy.di.Injector;
 import com.plumya.pricefy.ui.results.ResultsActivity;
+import com.plumya.pricefy.utils.LinkUtil;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -51,6 +55,7 @@ public class ResultDetailActivity extends AppCompatActivity {
     @BindView(R.id.toolbar_layout) CollapsingToolbarLayout toolbarLayout;
     @BindView(R.id.moreDataProgressBar) ProgressBar progressBar;
     @BindView(R.id.picassoProgressBar) ProgressBar picassoProgressBar;
+    @BindView(R.id.resultDetailCoordinatorLayout) CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -61,15 +66,24 @@ public class ResultDetailActivity extends AppCompatActivity {
         initializeToolbar();
         initializeAppBarLayout();
 
-        Intent intent = getIntent();
-        long itemId = intent.getLongExtra(ResultsActivity.ITEM_ID, -1);
-        String websiteItemUri = intent.getStringExtra(ResultsActivity.ITEM_DETAILS_URI);
+        long itemId = getItemId();
+        String websiteItemUri = getItemDetailsUri();
 
         ResultDetailActivityViewModelFactory factory =
                 Injector.provideResultsDetailViewModelFactory(getApplicationContext());
         viewModel = ViewModelProviders.of(this, factory).get(ResultDetailActivityViewModel.class);
         viewModel.setWebsiteItemId(itemId, websiteItemUri);
         viewModel.getWebsiteItem().observe(this, new WebsiteItemObserver());
+    }
+
+    private String getItemDetailsUri() {
+        Intent intent = getIntent();
+        return intent.getStringExtra(ResultsActivity.ITEM_DETAILS_URI);
+    }
+
+    private long getItemId() {
+        Intent intent = getIntent();
+        return intent.getLongExtra(ResultsActivity.ITEM_ID, -1);
     }
 
     private void initializeToolbar() {
@@ -96,6 +110,42 @@ public class ResultDetailActivity extends AppCompatActivity {
 
     private void showProgressBar(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    public void shopping(View view) {
+        Intent amazonIntent = getPackageManager().getLaunchIntentForPackage("com.amazon.mShop.android.shopping");
+        if (amazonIntent != null) {
+            String itemDetailsUri = getItemDetailsUri();
+            String[] itemPurchaseIdArray = itemDetailsUri.split("/dp/");
+            if (itemPurchaseIdArray.length > 1) {
+                String[] itemPurchaseExtractedArray = itemPurchaseIdArray[1].split("/");
+                if (itemPurchaseExtractedArray.length > 0) {
+                    String itemPurchaseId = itemPurchaseExtractedArray[0];
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse("com.amazon.mobile.shopping://www.amazon.com/products/" + itemPurchaseId +"/"));
+                    startActivity(intent);
+                } else {
+                    toBrowser();
+                }
+            } else {
+                toBrowser();
+            }
+        } else {
+            toBrowser();
+        }
+    }
+
+    private void toBrowser() {
+        String itemDetailsUri = LinkUtil.prepareItemDetailsUrl(getItemDetailsUri());
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(itemDetailsUri));
+        startActivity(browserIntent);
+        if (browserIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(browserIntent);
+        } else {
+            Snackbar
+                    .make(coordinatorLayout, R.string.no_apps_found_msg, Snackbar.LENGTH_LONG)
+                    .show();
+        }
     }
 
     private class UlTagHandler implements Html.TagHandler {

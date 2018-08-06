@@ -41,7 +41,7 @@ import butterknife.ButterKnife;
 
 public class ProgressCircleActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyDcusOmzydK7WdJS3pONSnCPL67KkB5pow";
     public static final String PROCESSING_RESULT = "processedResult";
     public static final String IMAGE_ID = "imageId";
     public static final String LOG_TAG = ProgressCircleActivity.class.getSimpleName();
@@ -61,7 +61,7 @@ public class ProgressCircleActivity extends AppCompatActivity {
         Intent intent = getIntent();
         if (intent.hasExtra(MainActivity.PHOTO_PATH_EXTRA)) {
             String photoPath = intent.getStringExtra(MainActivity.PHOTO_PATH_EXTRA);
-            progressText.setText("Compressing image..");
+            progressText.setText(R.string.compressing_image_progress_msg);
             new ImageRecognitionTask(this).execute(photoPath);
         }
     }
@@ -88,7 +88,7 @@ public class ProgressCircleActivity extends AppCompatActivity {
             bitmap.compress(Bitmap.CompressFormat.WEBP, QUALITY, byteArrayOutputStream);
             byte[] imageBytes = byteArrayOutputStream.toByteArray();
 
-            publishProgress(new String[] {"Recognizing image.."});
+            publishProgress(new String[] {getString(R.string.recognizing_image_progress_msg)});
 
             Image base64EncodedImage = new Image();
             base64EncodedImage.encodeContent(imageBytes);
@@ -98,6 +98,7 @@ public class ProgressCircleActivity extends AppCompatActivity {
 
             List<Feature> features = new ArrayList<>();
             features.add(new Feature().setType("LABEL_DETECTION"));
+            // next type detections for future releases
 //            features.add(new Feature().setType("TEXT_DETECTION"));
 //            features.add(new Feature().setType("IMAGE_PROPERTIES"));
 //            features.add(new Feature().setType("WEB_DETECTION"));
@@ -129,9 +130,11 @@ public class ProgressCircleActivity extends AppCompatActivity {
             }
             List<AnnotateImageResponse> responses = response.getResponses();
             if (responses.size() > 0) {
-                publishProgress(new String[] {"Saving image.."});
+                publishProgress(new String[] {getString(R.string.saving_image_progress_msg)});
                 AnnotateImageResponse annotateImageResponse = responses.get(0);
                 String labels = VisionModelMapper.mapLabels(annotateImageResponse);
+                // no labels recognized
+                if (labels == null) return null;
                 com.plumya.pricefy.data.local.model.Image image =
                         new com.plumya.pricefy.data.local.model.Image(
                                 photoPath, new Date(), labels, null, null, null

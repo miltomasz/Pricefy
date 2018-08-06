@@ -5,6 +5,8 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 import com.plumya.pricefy.R;
 import com.plumya.pricefy.data.local.model.WebsiteItem;
 import com.plumya.pricefy.data.network.NetworkDataSource;
+import com.plumya.pricefy.data.network.model.WebsiteItemModel;
 import com.plumya.pricefy.di.Injector;
 import com.plumya.pricefy.ui.detail.ResultDetailActivity;
 import com.plumya.pricefy.ui.main.MainActivity;
@@ -41,6 +44,7 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
     @BindView(R.id.resultsRv) RecyclerView resultsRv;
     @BindView(R.id.progressBarResults) ProgressBar progressBar;
     @BindView(R.id.toolbarResults) Toolbar toolbar;
+    @BindView(R.id.coordinatorLayoutResults) CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -60,6 +64,27 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
                 Injector.provideResultsActivityViewModelFactory(getApplicationContext());
         viewModel = ViewModelProviders.of(this, factory).get(ResultsActivityViewModel.class);
         viewModel.setImageParameters(imageId, params);
+
+        viewModel.getWebsiteItemModelErrors().observe(this, new Observer<WebsiteItemModel>() {
+            @Override
+            public void onChanged(@Nullable WebsiteItemModel websiteItemModel) {
+                if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_NO_DATA_FOUND) {
+                    showProgressBar(false);
+                    showEmptyTextView();
+                }
+                if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR) {
+                    showProgressBar(false);
+                    showEmptyTextView();
+                    Snackbar
+                            .make(
+                                    coordinatorLayout,
+                                    "Cannot find items. Take another picture and try again",
+                                    Snackbar.LENGTH_LONG
+                            ).show();
+                }
+            }
+        });
+
         viewModel.getWebsiteItems().observe(this, new Observer<List<WebsiteItem>>() {
             @Override
             public void onChanged(@Nullable List<WebsiteItem> websiteItems) {

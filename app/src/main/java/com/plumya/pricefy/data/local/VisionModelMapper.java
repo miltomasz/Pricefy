@@ -20,6 +20,10 @@ public class VisionModelMapper {
 
     public static String mapLabels(AnnotateImageResponse response) {
         List<EntityAnnotation> labelAnnotations = response.getLabelAnnotations();
+        if (labelAnnotations == null) {
+            // Could not recognize any labels
+            return null;
+        }
         Collections.sort(labelAnnotations, new Comparator<EntityAnnotation>() {
             @Override
             public int compare(EntityAnnotation ea1, EntityAnnotation ea2) {

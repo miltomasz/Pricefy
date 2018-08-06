@@ -12,6 +12,8 @@ import com.plumya.pricefy.data.local.WebsiteItemDao;
 import com.plumya.pricefy.data.local.model.Image;
 import com.plumya.pricefy.data.local.model.WebsiteItem;
 import com.plumya.pricefy.data.network.AmazonNetworkDaraSource;
+import com.plumya.pricefy.data.network.model.WebsiteItemModel;
+import com.plumya.pricefy.ui.results.SingleLiveEvent;
 import com.plumya.pricefy.utils.AppExecutors;
 import com.plumya.pricefy.utils.WebsiteItemsDiffCallback;
 
@@ -35,8 +37,11 @@ public class PricefyRepository {
     private final AmazonNetworkDaraSource networkDataSource;
     private final AppExecutors executors;
     private boolean initialized;
+
+    // Live data
     private LiveData<List<WebsiteItem>> websiteItems;
     private LiveData<WebsiteItem> websiteItem;
+    private SingleLiveEvent<WebsiteItemModel> websiteItemsErrors = new SingleLiveEvent<>();
 
     private PricefyRepository(ImageDao imageDao, WebsiteItemDao websiteItemDao,
                               AmazonNetworkDaraSource networkDataSource, AppExecutors executors) {
@@ -45,7 +50,7 @@ public class PricefyRepository {
         this.networkDataSource = networkDataSource;
         this.executors = executors;
 
-        LiveData<List<WebsiteItem>> networkItemList = networkDataSource.getWebsiteItems();
+        LiveData<WebsiteItemModel> networkItemList = networkDataSource.getWebsiteItems();
         networkItemList.observeForever(new ItemListObserver());
         LiveData<WebsiteItem> networkItemDetails = networkDataSource.getWebsiteItem();
         networkItemDetails.observeForever(new Observer<WebsiteItem>() {
@@ -119,6 +124,10 @@ public class PricefyRepository {
         return imageDao.getAllImages();
     }
 
+    public List<Image> getImagesForWidget() {
+        return imageDao.getImagesForWidget();
+    }
+
     public void setImageId(long imageId) {
         this.websiteItems = websiteItemDao.getWebsiteItems(imageId);
     }
@@ -186,17 +195,25 @@ public class PricefyRepository {
         }
     }
 
-    private class ItemListObserver implements Observer<List<WebsiteItem>> {
-        @Override
-        public void onChanged(@Nullable List<WebsiteItem> newWebsiteItems) {
-            executors.diskIO().execute(() -> {
-                final WebsiteItemsDiffCallback diffCallback =
-                        new WebsiteItemsDiffCallback(websiteItems.getValue(), newWebsiteItems);
+    public SingleLiveEvent<WebsiteItemModel> getWebsiteItemsErrors() {
+        return websiteItemsErrors;
+    }
 
-                final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
-                diffResult.dispatchUpdatesTo(
-                        new DiffWebsiteItemsUpdateCallback(websiteItemDao, newWebsiteItems)
-                );
+    private class ItemListObserver implements Observer<WebsiteItemModel> {
+        @Override
+        public void onChanged(@Nullable WebsiteItemModel newWebsiteItemModel) {
+            executors.diskIO().execute(() -> {
+                if (newWebsiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_OK) {
+                    final WebsiteItemsDiffCallback diffCallback =
+                            new WebsiteItemsDiffCallback(websiteItems.getValue(), newWebsiteItemModel.getWebsiteItems());
+
+                    final DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(diffCallback);
+                    diffResult.dispatchUpdatesTo(
+                            new DiffWebsiteItemsUpdateCallback(websiteItemDao, newWebsiteItemModel.getWebsiteItems())
+                    );
+                } else {
+                    websiteItemsErrors.postValue(newWebsiteItemModel);
+                }
             });
         }
     }

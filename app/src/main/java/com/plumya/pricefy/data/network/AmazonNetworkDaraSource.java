@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.plumya.pricefy.data.local.model.WebsiteItem;
+import com.plumya.pricefy.data.network.model.WebsiteItemModel;
 import com.plumya.pricefy.ui.main.MainActivity;
 import com.plumya.pricefy.ui.results.ResultsActivity;
 import com.plumya.pricefy.utils.AppExecutors;
@@ -32,14 +33,14 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
     private final Context context;
     private final AppExecutors executors;
     private final WebsiteParser websiteParser;
-    private final MutableLiveData<List<WebsiteItem>> downloadedWebsiteItems;
+    private final MutableLiveData<WebsiteItemModel> downloadedWebsiteItemModel;
     private final MutableLiveData<WebsiteItem> downloadedWebsiteItemDetails;
 
     private AmazonNetworkDaraSource(Context context, AppExecutors executors, WebsiteParser websiteParser) {
         this.context = context;
         this.executors = executors;
         this.websiteParser = websiteParser;
-        this.downloadedWebsiteItems = new MutableLiveData<>();
+        this.downloadedWebsiteItemModel = new MutableLiveData<>();
         this.downloadedWebsiteItemDetails = new MutableLiveData<>();
     }
 
@@ -57,8 +58,8 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
         return instance;
     }
 
-    public LiveData<List<WebsiteItem>> getWebsiteItems() {
-        return downloadedWebsiteItems;
+    public LiveData<WebsiteItemModel> getWebsiteItems() {
+        return downloadedWebsiteItemModel;
     }
 
     public LiveData<WebsiteItem> getWebsiteItem() {
@@ -86,8 +87,19 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
     public void parseResponse(long imageId, final Document document) {
         Log.d(LOG_TAG, "Parsing item list document: " + document.title());
         executors.networkIO().execute(() -> {
-            List<WebsiteItem> websiteItems = websiteParser.parseItems(imageId, document);
-            downloadedWebsiteItems.postValue(websiteItems);
+            int resultCode = WebsiteItemModel.ResultStatus.REQUEST_OK;
+            List<WebsiteItem> websiteItems = null;
+            try {
+                websiteItems = websiteParser.parseItems(imageId, document);
+                if (websiteItems == null || websiteItems.size() == 0) {
+                    resultCode = WebsiteItemModel.ResultStatus.REQUEST_NO_DATA_FOUND;
+                }
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Exception while parsing items: " + e.getMessage());
+                resultCode = WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR;
+            }
+            WebsiteItemModel model = new WebsiteItemModel(websiteItems, resultCode);
+            downloadedWebsiteItemModel.postValue(model);
         });
     }
 

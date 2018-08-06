@@ -16,6 +16,6 @@ public interface WebsiteParser {
     String getMainTitle();
     Double getPrice();
     Double getStars();
-    List<WebsiteItem> parseItems(long imageId, Document document);
+    List<WebsiteItem> parseItems(long imageId, Document document) throws Exception;
     WebsiteItem parseItemDetails(long itemId, Document document);
 }

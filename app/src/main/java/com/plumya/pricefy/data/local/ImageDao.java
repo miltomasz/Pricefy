@@ -22,4 +22,7 @@ public interface ImageDao {
 
     @Query("SELECT * FROM images ORDER BY captureDate DESC")
     LiveData<List<Image>> getAllImages();
+
+    @Query("SELECT * FROM images ORDER BY captureDate DESC")
+    List<Image> getImagesForWidget();
 }

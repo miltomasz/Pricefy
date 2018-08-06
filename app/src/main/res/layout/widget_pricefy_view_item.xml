@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:id="@+id/widgetImageView"
+        android:layout_width="@dimen/widget_thumbnail_size"
+        android:layout_height="@dimen/widget_thumbnail_size"
+        android:padding="@dimen/widget_margin"
+        android:scaleType="centerCrop" />
+
+    <LinearLayout
+        android:id="@+id/main_layout_view_item"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/widget_margin">
+
+        <TextView
+            android:id="@+id/widgetLabelsTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:paddingBottom="@dimen/widget_margin"
+            android:paddingEnd="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingStart="8dp"
+            android:textStyle="bold"
+            tools:text="Labels" />
+
+        <TextView
+            android:id="@+id/widgetDateTv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingEnd="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingStart="8dp"
+            android:textSize="10sp"
+            tools:text="12-12-2018" />
+    </LinearLayout>
+
+</LinearLayout>

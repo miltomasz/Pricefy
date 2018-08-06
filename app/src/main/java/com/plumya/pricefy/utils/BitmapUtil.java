@@ -36,4 +36,23 @@ public class BitmapUtil {
         bmOptions.inSampleSize = scaleFactor;
         return BitmapFactory.decodeFile(imagePath);
     }
+
+    public static Bitmap resampleWidgetPic(String imagePath) {
+        int targetH = 38;
+        int targetW = 38;
+
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+
+        BitmapFactory.decodeFile(imagePath);
+
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        return BitmapFactory.decodeFile(imagePath);
+    }
 }

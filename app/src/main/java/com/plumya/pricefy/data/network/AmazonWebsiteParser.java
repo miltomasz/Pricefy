@@ -39,7 +39,7 @@ public class AmazonWebsiteParser implements WebsiteParser {
     }
 
     @Override
-    public List<WebsiteItem> parseItems(long imageId, Document doc) {
+    public List<WebsiteItem> parseItems(long imageId, Document doc) throws Exception {
         List<WebsiteItem> websiteItems = new ArrayList<>();
 
         boolean oneColumn = isOneColumn(doc);
