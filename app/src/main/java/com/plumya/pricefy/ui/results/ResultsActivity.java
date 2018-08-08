@@ -24,6 +24,7 @@ import com.plumya.pricefy.data.network.model.WebsiteItemModel;
 import com.plumya.pricefy.di.Injector;
 import com.plumya.pricefy.ui.detail.ResultDetailActivity;
 import com.plumya.pricefy.ui.main.MainActivity;
+import com.plumya.pricefy.utils.NetworkUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,39 +66,8 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
         viewModel = ViewModelProviders.of(this, factory).get(ResultsActivityViewModel.class);
         viewModel.setImageParameters(imageId, params);
 
-        viewModel.getWebsiteItemModelErrors().observe(this, new Observer<WebsiteItemModel>() {
-            @Override
-            public void onChanged(@Nullable WebsiteItemModel websiteItemModel) {
-                if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_NO_DATA_FOUND) {
-                    showProgressBar(false);
-                    showEmptyTextView();
-                }
-                if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR) {
-                    showProgressBar(false);
-                    showEmptyTextView();
-                    Snackbar
-                            .make(
-                                    coordinatorLayout,
-                                    "Cannot find items. Take another picture and try again",
-                                    Snackbar.LENGTH_LONG
-                            ).show();
-                }
-            }
-        });
-
-        viewModel.getWebsiteItems().observe(this, new Observer<List<WebsiteItem>>() {
-            @Override
-            public void onChanged(@Nullable List<WebsiteItem> websiteItems) {
-                Log.d(LOG_TAG, "Website items changed: " + websiteItems);
-                if (websiteItems != null && websiteItems.size() > 0) {
-                    showRecyclerView();
-                    updateAdapter(websiteItems);
-                } else {
-                   showEmptyTextView();
-                }
-                showProgressBar(false);
-            }
-        });
+        viewModel.getWebsiteItemModelErrors().observe(this, new WebsiteItemModelErrorsObserver());
+        viewModel.getWebsiteItems().observe(this, new WebsiteItemsObserver());
     }
 
     private void initializeToolbar() {
@@ -140,10 +110,61 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
 
     @Override
     public void onClick(WebsiteItem websiteItem) {
-        Log.d(LOG_TAG, "Clicking item: " + websiteItem.getMainTitle());
-        Intent intent = new Intent(this, ResultDetailActivity.class);
-        intent.putExtra(ITEM_ID, websiteItem.getId());
-        intent.putExtra(ITEM_DETAILS_URI, websiteItem.getDetailsUri());
-        startActivity(intent);
+        if (NetworkUtil.isNetworkAvailable(this)) {
+            Log.d(LOG_TAG, "Tapping item: " + websiteItem.getMainTitle());
+            Intent intent = new Intent(this, ResultDetailActivity.class);
+            intent.putExtra(ITEM_ID, websiteItem.getId());
+            intent.putExtra(ITEM_DETAILS_URI, websiteItem.getDetailsUri());
+            startActivity(intent);
+        } else {
+            showSnackbar(R.string.no_internet_connection);
+        }
+    }
+
+    private void showSnackbar(int messageId) {
+        Snackbar
+                .make(coordinatorLayout, messageId, Snackbar.LENGTH_LONG)
+                .show();
+    }
+
+    /**
+     * Observes errors (exceptions) that might be thrown from website items endpoints
+     */
+    private class WebsiteItemModelErrorsObserver implements Observer<WebsiteItemModel> {
+        @Override
+        public void onChanged(@Nullable WebsiteItemModel websiteItemModel) {
+            if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_NO_DATA_FOUND) {
+                showProgressBar(false);
+                showEmptyTextView();
+            }
+            if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR) {
+                showProgressBar(false);
+                showEmptyTextView();
+                showSnackbar(R.string.cannot_find_items_msg);
+            }
+            if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR) {
+                showProgressBar(false);
+                showEmptyTextView();
+                showSnackbar(R.string.general_error_msg);
+            }
+        }
+    }
+
+    /**
+     * Observes changes in website items sources (local db or network)
+     */
+    private class WebsiteItemsObserver implements Observer<List<WebsiteItem>> {
+        @Override
+        public void onChanged(@Nullable List<WebsiteItem> websiteItems) {
+            Log.d(LOG_TAG, "Website items changed: " + websiteItems);
+            if (websiteItems != null && websiteItems.size() > 0) {
+                showRecyclerView();
+                updateAdapter(websiteItems);
+            } else {
+                Log.d(LOG_TAG, "No items found");
+                showEmptyTextView();
+            }
+            showProgressBar(false);
+        }
     }
 }

@@ -34,6 +34,7 @@ import com.plumya.pricefy.data.network.NetworkDataSource;
 import com.plumya.pricefy.data.widget.PricefyWidgetProvider;
 import com.plumya.pricefy.di.Injector;
 import com.plumya.pricefy.ui.results.ResultsActivity;
+import com.plumya.pricefy.utils.NetworkUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -149,22 +150,28 @@ public class MainActivity extends AppCompatActivity implements ImagesAdapter.Ima
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Intent processTakenImageIntent = new Intent(this, ProgressCircleActivity.class);
-            processTakenImageIntent.putExtra(PHOTO_PATH_EXTRA, currentPhotoPath);
-            startActivityForResult(processTakenImageIntent, REQUEST_IMAGE_PROCESSING);
-        } else if (requestCode == REQUEST_IMAGE_PROCESSING) {
-            if (resultCode != RESULT_OK) {
-                Snackbar
-                        .make(coordinatorLayout, R.string.could_not_process_image_error, Snackbar.LENGTH_LONG)
-                        .show();
+        if (requestCode == REQUEST_IMAGE_CAPTURE) {
+            if (resultCode == RESULT_OK) {
+                Intent processTakenImageIntent = new Intent(this, ProgressCircleActivity.class);
+                processTakenImageIntent.putExtra(PHOTO_PATH_EXTRA, currentPhotoPath);
+                if (NetworkUtil.isNetworkAvailable(this)) {
+                    startActivityForResult(processTakenImageIntent, REQUEST_IMAGE_PROCESSING);
+                } else {
+                    showSnackbar(R.string.no_internet_connection);
+                }
             } else {
+                showSnackbar(R.string.could_not_take_pic_error);
+            }
+        } else if (requestCode == REQUEST_IMAGE_PROCESSING) {
+            if (resultCode == RESULT_OK) {
                 Intent intent = new Intent(this, PricefyWidgetProvider.class);
                 intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
                 int[] appWidgetIds = AppWidgetManager.getInstance(getApplication())
                         .getAppWidgetIds(new ComponentName(getApplication(), PricefyWidgetProvider.class));
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, appWidgetIds);
                 sendBroadcast(intent);
+            } else {
+                showSnackbar(R.string.could_not_process_image_error);
             }
         }
     }
@@ -177,9 +184,7 @@ public class MainActivity extends AppCompatActivity implements ImagesAdapter.Ima
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     launchCamera();
                 } else {
-                    Snackbar
-                            .make(coordinatorLayout, R.string.camera_permissions_error, Snackbar.LENGTH_LONG)
-                            .show();
+                    showSnackbar(R.string.camera_permissions_error);
                 }
             }
         }
@@ -201,15 +206,17 @@ public class MainActivity extends AppCompatActivity implements ImagesAdapter.Ima
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             } else {
-                Snackbar
-                        .make(coordinatorLayout, R.string.could_not_take_pic_error, Snackbar.LENGTH_LONG)
-                        .show();
+                showSnackbar(R.string.could_not_take_pic_error);
             }
         } else {
-            Snackbar
-                    .make(coordinatorLayout, R.string.no_camera_app_error, Snackbar.LENGTH_LONG)
-                    .show();
+            showSnackbar(R.string.no_camera_app_error);
         }
+    }
+
+    private void showSnackbar(int messageId) {
+        Snackbar
+                .make(coordinatorLayout, messageId, Snackbar.LENGTH_LONG)
+                .show();
     }
 
     private File createImageFile() throws IOException {

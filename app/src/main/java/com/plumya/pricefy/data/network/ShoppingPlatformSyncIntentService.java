@@ -25,7 +25,12 @@ public class ShoppingPlatformSyncIntentService extends IntentService {
         String params = intent.getStringExtra(NetworkDataSource.PARAMS);
         NetworkDataSource networkDataSource =
                 Injector.provideAmazonNetworkDataSource(this.getApplicationContext());
-        Document document = networkDataSource.executeRequest(params);
-        networkDataSource.parseResponse(imageId, document);
+        try {
+            Document document = networkDataSource.executeRequest(params);
+            networkDataSource.parseResponse(imageId, document);
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Exception occurred while executing request: " + params);
+            networkDataSource.errorCallback(e.getMessage());
+        }
     }
 }

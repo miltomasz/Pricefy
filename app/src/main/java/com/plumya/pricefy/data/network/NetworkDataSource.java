@@ -22,4 +22,6 @@ public interface NetworkDataSource {
     Document fetchItemDetails(String websiteItemUri);
 
     void parseDetailsResponse(long itemId, Document document);
+
+    void errorCallback(String msg);
 }

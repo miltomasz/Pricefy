@@ -28,6 +28,8 @@ import com.plumya.pricefy.data.local.model.WebsiteItem;
 import com.plumya.pricefy.di.Injector;
 import com.plumya.pricefy.ui.results.ResultsActivity;
 import com.plumya.pricefy.utils.LinkUtil;
+import com.plumya.pricefy.utils.NetworkUtil;
+import com.plumya.pricefy.utils.UIUtil;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
@@ -39,6 +41,9 @@ import butterknife.ButterKnife;
 public class ResultDetailActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = ResultDetailActivity.class.getSimpleName();
+    private static final String COM_AMAZON_M_SHOP_ANDROID_SHOPPING = "com.amazon.mShop.android.shopping";
+    private static final String AMAZON_APP_PRODUCT_URI = "com.amazon.mobile.shopping://www.amazon.com/products/";
+
     private ResultDetailActivityViewModel viewModel;
 
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -49,6 +54,7 @@ public class ResultDetailActivity extends AppCompatActivity {
     @BindView(R.id.fitTv) TextView fitTv;
     @BindView(R.id.sizeTv) TextView sizeTv;
     @BindView(R.id.colorTv) TextView colorTv;
+    @BindView(R.id.priceDetailTv) TextView priceDetailTv;
     @BindView(R.id.featuresList) TextView features;
     @BindView(R.id.featuresCardView) CardView featuresCardView;
     @BindView(R.id.app_bar) AppBarLayout appBarLayout;
@@ -94,26 +100,23 @@ public class ResultDetailActivity extends AppCompatActivity {
     }
 
     private void initializeAppBarLayout() {
-        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                if (Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
-                    // Collapsed
-                    toolbarLayout.setTitle(getResources().getString(R.string.app_name));
-                } else {
-                    //Expanded
-                    toolbarLayout.setTitle("");
-                }
-            }
-        });
+        appBarLayout.addOnOffsetChangedListener(new AppBarLayoutOffsetListener());
     }
 
     private void showProgressBar(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * 'Purchase' FAB OnClick handler. Checks if Amazon app is installed and runs it. Runs browser otherwise.
+     * @param view
+     */
     public void shopping(View view) {
-        Intent amazonIntent = getPackageManager().getLaunchIntentForPackage("com.amazon.mShop.android.shopping");
+        if (!NetworkUtil.isNetworkAvailable(this)) {
+            showSnackbar(R.string.no_internet_connection);
+            return;
+        }
+        Intent amazonIntent = getPackageManager().getLaunchIntentForPackage(COM_AMAZON_M_SHOP_ANDROID_SHOPPING);
         if (amazonIntent != null) {
             String itemDetailsUri = getItemDetailsUri();
             String[] itemPurchaseIdArray = itemDetailsUri.split("/dp/");
@@ -122,7 +125,7 @@ public class ResultDetailActivity extends AppCompatActivity {
                 if (itemPurchaseExtractedArray.length > 0) {
                     String itemPurchaseId = itemPurchaseExtractedArray[0];
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse("com.amazon.mobile.shopping://www.amazon.com/products/" + itemPurchaseId +"/"));
+                    intent.setData(Uri.parse(AMAZON_APP_PRODUCT_URI + itemPurchaseId +"/"));
                     startActivity(intent);
                 } else {
                     toBrowser();
@@ -148,11 +151,21 @@ public class ResultDetailActivity extends AppCompatActivity {
         }
     }
 
+    private void showSnackbar(int messageId) {
+        Snackbar
+                .make(coordinatorLayout, messageId, Snackbar.LENGTH_LONG)
+                .show();
+    }
+
     private class UlTagHandler implements Html.TagHandler {
+
+        private static final String UL_TAG = "ul";
+        private static final String LI_TAG = "li";
+
         @Override
         public void handleTag(boolean opening, String tag, Editable output, XMLReader xmlReader) {
-            if (tag.equals("ul") && !opening) output.append("\n");
-            if (tag.equals("li") && opening) output.append("\n\t • ");
+            if (tag.equals(UL_TAG) && !opening) output.append("\n");
+            if (tag.equals(LI_TAG) && opening) output.append("\n\t • ");
         }
     }
 
@@ -176,11 +189,15 @@ public class ResultDetailActivity extends AppCompatActivity {
                         });
                 mainTitleTv.setText(websiteItem.getMainTitle());
                 ratingBar.setRating(websiteItem.getStars());
+                priceDetailTv.setText(UIUtil.formatPrice(
+                        String.valueOf(websiteItem.getPriceFrom()),
+                        String.valueOf(websiteItem.getPriceTo()))
+                );
                 if (websiteItem.isDetailsLoaded()) {
-                    displayText(reviewsTv, "Reviews: ", websiteItem.getReviews());
-                    displayText(fitTv, "Fit: ", websiteItem.getFit());
-                    displayText(sizeTv, "Size: ", websiteItem.getSize());
-                    displayText(colorTv, "Color: ", websiteItem.getColor());
+                    displayText(reviewsTv, getString(R.string.details_reviews_prefix), websiteItem.getReviews());
+                    displayText(fitTv, getString(R.string.details_fit_prefix), websiteItem.getFit());
+                    displayText(sizeTv, getString(R.string.details_size_prefix), websiteItem.getSize());
+                    displayText(colorTv, getString(R.string.details_color_prefix), websiteItem.getColor());
                     if (!TextUtils.isEmpty(websiteItem.getFeatures())) {
                         featuresCardView.setVisibility(View.VISIBLE);
                         features.setText(Html.fromHtml(
@@ -202,6 +219,19 @@ public class ResultDetailActivity extends AppCompatActivity {
                 tv.setText(preFix + text);
             } else {
                 tv.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    private class AppBarLayoutOffsetListener implements AppBarLayout.OnOffsetChangedListener {
+        @Override
+        public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+            if (Math.abs(verticalOffset) - appBarLayout.getTotalScrollRange() == 0) {
+                // Collapsed
+                toolbarLayout.setTitle(getResources().getString(R.string.app_name));
+            } else {
+                //Expanded
+                toolbarLayout.setTitle("");
             }
         }
     }

@@ -6,4 +6,6 @@
 
     <color name="colorAccent">#FFE57F</color>
     <color name="colorAccentLight">#FFE57F</color>
+    <color name="widget_background_color">#09C</color>
+    <color name="widget_text_color">#ffffff</color>
 </resources>

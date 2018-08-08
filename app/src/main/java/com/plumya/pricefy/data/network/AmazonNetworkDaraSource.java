@@ -85,7 +85,7 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
 
     @Override
     public void parseResponse(long imageId, final Document document) {
-        Log.d(LOG_TAG, "Parsing item list document: " + document.title());
+        Log.d(LOG_TAG, "Parsing item list document: " + document);
         executors.networkIO().execute(() -> {
             int resultCode = WebsiteItemModel.ResultStatus.REQUEST_OK;
             List<WebsiteItem> websiteItems = null;
@@ -139,6 +139,13 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
             WebsiteItem temporaryWebsiteItem = websiteParser.parseItemDetails(itemId, document);
             downloadedWebsiteItemDetails.postValue(temporaryWebsiteItem);
         });
+    }
+
+    @Override
+    public void errorCallback(String message) {
+        downloadedWebsiteItemModel.postValue(
+                new WebsiteItemModel(null, WebsiteItemModel.ResultStatus.REQUEST_NETWORK_ERROR)
+        );
     }
 
     /**

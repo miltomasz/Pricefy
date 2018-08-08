@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.plumya.pricefy.R;
 import com.plumya.pricefy.data.local.model.WebsiteItem;
+import com.plumya.pricefy.utils.UIUtil;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -51,7 +52,10 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
     public void onBindViewHolder(@NonNull ResultsAdapter.ViewHolder holder, int position) {
         WebsiteItem websiteItem = websiteItems.get(position);
         holder.mainTitleTv.setText(websiteItem.getMainTitle());
-        String price = getPrice(websiteItem);
+        String price = UIUtil.formatPrice(
+                String.valueOf(websiteItem.getPriceFrom()),
+                String.valueOf(websiteItem.getPriceTo())
+        );
         holder.priceTv.setText(price);
         holder.ratingBar.setRating(websiteItem.getStars());
         Picasso.get()
@@ -60,13 +64,6 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
                 .centerCrop()
                 .error(R.drawable.ic_baseline_photo_camera_24px)
                 .into(holder.imageView);
-    }
-
-    @NonNull
-    private String getPrice(WebsiteItem websiteItem) {
-        String priceFrom = String.valueOf(websiteItem.getPriceFrom());
-        String priceTo = String.valueOf(websiteItem.getPriceTo());
-        return "$" + priceFrom + (priceTo.equals("0.0") ? "" : " - " + priceTo);
     }
 
     @Override

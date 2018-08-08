@@ -26,7 +26,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:background="@color/colorAccentLight"
         android:clipToPadding="false"
-        android:padding="8dp"
+        android:padding="@dimen/base_margin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
@@ -35,7 +35,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorAccentLight"
-        android:padding="8dp"
+        android:descendantFocusability="afterDescendants"
+        android:padding="@dimen/base_margin"
         android:clipToPadding="true"
         android:gravity="center" />
 
@@ -50,8 +51,8 @@
             android:layout_height="wrap_content"
             android:textAlignment="center"
             android:text="@string/empty_view_text"
-            android:textColor="#ffffff"
-            android:textSize="20sp"
+            android:textColor="@color/widget_text_color"
+            android:textSize="@dimen/widget_empty_text_size"
             android:textStyle="bold" />
     </RelativeLayout>
 

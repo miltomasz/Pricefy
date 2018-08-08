@@ -7,7 +7,9 @@
     <dimen name="fab_elevation">2dp</dimen>
     <dimen name="fab_press_translation_z">6dp</dimen>
     <dimen name="fab_margin">24dp</dimen>
+    <dimen name="base_margin">8dp</dimen>
     <dimen name="base_margin_detail_view">8dp</dimen>
+    <dimen name="big_margin">16dp</dimen>
     <dimen name="big_margin_detail_view">16dp</dimen>
     <dimen name="app_bar_detail_view_height">250dp</dimen>
     <dimen name="card_view_radius">4dp</dimen>
@@ -19,5 +21,13 @@ http://developer.android.com/guide/topics/appwidgets/index.html#CreatingLayout
     -->
     <dimen name="widget_margin">8dp</dimen>
     <dimen name="widget_thumbnail_size">50dp</dimen>
+    <dimen name="progress_width">160dp</dimen>
+    <dimen name="progress_height">160dp</dimen>
+    <dimen name="main_title_width">0dp</dimen>
+    <dimen name="image_view_thumbnail_size">120dp</dimen>
+    <dimen name="widget_text_size">24sp</dimen>
+    <dimen name="price_text_size">28sp</dimen>
+    <dimen name="widget_empty_text_size">20sp</dimen>
+    <dimen name="widget_date_text_size">10sp</dimen>
 
 </resources>

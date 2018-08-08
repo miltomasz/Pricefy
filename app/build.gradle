@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'PricefyKey'
+            keyPassword 'udacitypricefy99'
+            storeFile file('pricefy.jks')
+            storePassword 'udacitypricefy99'
+        }
+    }
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.plumya.pricefy"
@@ -14,6 +22,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
     }
     configurations.all {
@@ -23,10 +32,16 @@ android {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+    lintOptions {
+        checkReleaseBuilds false
+        // Or, if you prefer, you can continue to check for errors in release builds,
+        // but continue the build even when errors are found:
+        abortOnError false
+    }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "com.android.support:appcompat-v7:$rootProject.supportVersion"
     implementation "com.android.support:recyclerview-v7:$rootProject.supportVersion"
     implementation "com.android.support:cardview-v7:$rootProject.supportVersion"
@@ -47,12 +62,12 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
     implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
-    implementation group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
+    implementation 'org.jsoup:jsoup:1.11.3'
 
     // Local db
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
 
-//    implementation 'com.android.support:multidex:1.0.3'
+    //    implementation 'com.android.support:multidex:1.0.3'
 
     // Google Vision API dependencies
     implementation 'com.google.api-client:google-api-client-android:1.23.0' exclude module: 'httpclient'
@@ -61,7 +76,6 @@ dependencies {
 
     // Test dependencies
     testImplementation 'junit:junit:4.12'
-
     androidTestImplementation "com.android.support:support-annotations:$rootProject.supportVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.espressoVersion"
     androidTestImplementation "com.android.support.test.espresso:espresso-intents:$rootProject.espressoVersion"

@@ -34,6 +34,7 @@
                     android:layout_height="match_parent"
                     android:background="@android:color/background_light"
                     android:scaleType="centerCrop"
+                    android:contentDescription="@string/big_picture_selected_product"
                     app:layout_collapseMode="parallax"
                     app:layout_collapseParallaxMultiplier="0.7" />
 
@@ -71,13 +72,13 @@
 
             <TextView
                 android:id="@+id/mainTitleTv"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/main_title_width"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/base_margin_detail_view"
                 android:layout_marginStart="@dimen/base_margin_detail_view"
                 android:layout_marginTop="@dimen/big_margin_detail_view"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:text="Main title Hout Women LightWeight.."
+                tools:text="Main title Hout Women LightWeight.."
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -88,6 +89,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/base_margin_detail_view"
                 android:layout_marginTop="@dimen/base_margin_detail_view"
+                android:contentDescription="@string/stars_rating_bar"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/mainTitleTv" />
 
@@ -97,10 +99,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/base_margin_detail_view"
                 android:layout_marginTop="@dimen/base_margin_detail_view"
-                tools:text="55 reviews"
                 android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
+                app:layout_constraintTop_toBottomOf="@+id/priceDetailTv"
+                tools:text="55 reviews" />
 
             <TextView
                 android:id="@+id/fitTv"
@@ -140,7 +142,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="@dimen/big_margin_detail_view"
                 android:layout_marginEnd="@dimen/base_margin_detail_view"
                 android:layout_marginStart="@dimen/base_margin_detail_view"
                 android:layout_marginTop="@dimen/base_margin_detail_view"
@@ -186,8 +188,19 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/base_margin_detail_view"
                 android:layout_marginStart="@dimen/base_margin_detail_view"
-                android:layout_marginTop="@dimen/large_margin_detail_view"
+                android:layout_marginTop="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/priceDetailTv" />
+
+            <TextView
+                android:id="@+id/priceDetailTv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/base_margin_detail_view"
+                android:layout_marginTop="@dimen/base_margin_detail_view"
+                android:textAppearance="@style/TextAppearance.AppCompat.Display2"
+                tools:text="$23.99"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/ratingBar" />
 
@@ -201,7 +214,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
         android:onClick="shopping"
-        android:elevation="6dp"
+        android:elevation="@dimen/fab_elevation"
         app:layout_anchor="@id/app_bar"
         app:layout_anchorGravity="bottom|end"
         android:src="@drawable/ic_baseline_shop_24px"
