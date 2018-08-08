@@ -67,8 +67,6 @@ dependencies {
     // Local db
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
 
-    //    implementation 'com.android.support:multidex:1.0.3'
-
     // Google Vision API dependencies
     implementation 'com.google.api-client:google-api-client-android:1.23.0' exclude module: 'httpclient'
     implementation 'com.google.http-client:google-http-client-gson:1.23.0' exclude module: 'httpclient'
@@ -76,17 +74,4 @@ dependencies {
 
     // Test dependencies
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation "com.android.support:support-annotations:$rootProject.supportVersion"
-    androidTestImplementation "com.android.support.test.espresso:espresso-core:$rootProject.espressoVersion"
-    androidTestImplementation "com.android.support.test.espresso:espresso-intents:$rootProject.espressoVersion"
-    implementation "com.android.support.test.espresso:espresso-idling-resource:$rootProject.espressoVersion"
-    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:$rootProject.espressoVersion") {
-        // Necessary to avoid version conflicts
-        exclude group: 'com.android.support', module: 'appcompat'
-        exclude group: 'com.android.support', module: 'support-v4'
-        exclude group: 'com.android.support', module: 'support-annotations'
-        exclude module: 'recyclerview-v7'
-    }
-    androidTestImplementation "com.android.support.test:rules:$rootProject.supportTestVersion"
-    androidTestImplementation "com.android.support.test:runner:$rootProject.supportTestVersion"
 }
