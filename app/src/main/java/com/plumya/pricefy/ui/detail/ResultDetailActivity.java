@@ -5,6 +5,7 @@ import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -114,6 +115,8 @@ public class ResultDetailActivity extends AppCompatActivity {
     public void shopping(View view) {
         if (!NetworkUtil.isNetworkAvailable(this)) {
             showSnackbar(R.string.no_internet_connection);
+            Intent intent = new Intent(Settings.ACTION_NETWORK_OPERATOR_SETTINGS);
+            startActivity(intent);
             return;
         }
         Intent amazonIntent = getPackageManager().getLaunchIntentForPackage(COM_AMAZON_M_SHOP_ANDROID_SHOPPING);
@@ -145,9 +148,7 @@ public class ResultDetailActivity extends AppCompatActivity {
         if (browserIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(browserIntent);
         } else {
-            Snackbar
-                    .make(coordinatorLayout, R.string.no_apps_found_msg, Snackbar.LENGTH_LONG)
-                    .show();
+            showSnackbar(R.string.no_apps_found_msg);
         }
     }
 

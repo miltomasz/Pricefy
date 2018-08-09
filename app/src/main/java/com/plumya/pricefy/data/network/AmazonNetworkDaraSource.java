@@ -87,16 +87,16 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
     public void parseResponse(long imageId, final Document document) {
         Log.d(LOG_TAG, "Parsing item list document: " + document);
         executors.networkIO().execute(() -> {
-            int resultCode = WebsiteItemModel.ResultStatus.REQUEST_OK;
+            int resultCode = ResultStatus.REQUEST_OK;
             List<WebsiteItem> websiteItems = null;
             try {
                 websiteItems = websiteParser.parseItems(imageId, document);
                 if (websiteItems == null || websiteItems.size() == 0) {
-                    resultCode = WebsiteItemModel.ResultStatus.REQUEST_NO_DATA_FOUND;
+                    resultCode = ResultStatus.REQUEST_NO_DATA_FOUND;
                 }
             } catch (Exception e) {
                 Log.e(LOG_TAG, "Exception while parsing items: " + e.getMessage());
-                resultCode = WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR;
+                resultCode = ResultStatus.REQUEST_PARSING_ERROR;
             }
             WebsiteItemModel model = new WebsiteItemModel(websiteItems, resultCode);
             downloadedWebsiteItemModel.postValue(model);
@@ -142,10 +142,8 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
     }
 
     @Override
-    public void errorCallback(String message) {
-        downloadedWebsiteItemModel.postValue(
-                new WebsiteItemModel(null, WebsiteItemModel.ResultStatus.REQUEST_NETWORK_ERROR)
-        );
+    public void errorCallback(int resultStatus) {
+        downloadedWebsiteItemModel.postValue(new WebsiteItemModel(null, resultStatus));
     }
 
     /**
@@ -153,7 +151,7 @@ public class AmazonNetworkDaraSource implements NetworkDataSource {
      */
     public void startShoppingPlatformSyncIntentService(long imageId, String params) {
         Intent intentToFetch = new Intent(context, ShoppingPlatformSyncIntentService.class);
-        intentToFetch.putExtra(NetworkDataSource.PARAMS, params);
+        intentToFetch.putExtra(PARAMS, params);
         intentToFetch.putExtra(MainActivity.IMAGE_ID, imageId);
         context.startService(intentToFetch);
     }

@@ -33,7 +33,6 @@
             android:name=".ui.main.ProgressCircleActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:parentActivityName=".ui.main.MainActivity"
-            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Translucent">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

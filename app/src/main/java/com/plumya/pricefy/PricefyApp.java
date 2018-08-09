@@ -12,6 +12,8 @@ public class PricefyApp extends Application {
 
     public void onCreate() {
         super.onCreate();
-        StethoUtil.install(this);
+        if (BuildConfig.DEBUG_MODE) {
+            StethoUtil.install(this);
+        }
     }
 }

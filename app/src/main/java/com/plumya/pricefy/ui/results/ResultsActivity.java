@@ -1,5 +1,6 @@
 package com.plumya.pricefy.ui.results;
 
+import android.app.ActivityOptions;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -19,7 +20,6 @@ import android.widget.TextView;
 
 import com.plumya.pricefy.R;
 import com.plumya.pricefy.data.local.model.WebsiteItem;
-import com.plumya.pricefy.data.network.NetworkDataSource;
 import com.plumya.pricefy.data.network.model.WebsiteItemModel;
 import com.plumya.pricefy.di.Injector;
 import com.plumya.pricefy.ui.detail.ResultDetailActivity;
@@ -31,6 +31,9 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+
+import static com.plumya.pricefy.data.network.NetworkDataSource.PARAMS;
+import static com.plumya.pricefy.data.network.NetworkDataSource.ResultStatus;
 
 public class ResultsActivity extends AppCompatActivity implements ResultsAdapter.WebsiteItemOnClickHandler {
 
@@ -59,7 +62,7 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
 
         Intent intent = getIntent();
         long imageId = intent.getLongExtra(MainActivity.IMAGE_ID, -1);
-        String params = intent.getStringExtra(NetworkDataSource.PARAMS);
+        String params = intent.getStringExtra(PARAMS);
 
         ResultsActivityViewModelFactory factory =
                 Injector.provideResultsActivityViewModelFactory(getApplicationContext());
@@ -115,7 +118,12 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
             Intent intent = new Intent(this, ResultDetailActivity.class);
             intent.putExtra(ITEM_ID, websiteItem.getId());
             intent.putExtra(ITEM_DETAILS_URI, websiteItem.getDetailsUri());
-            startActivity(intent);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
+                startActivity(intent, bundle);
+            } else {
+                startActivity(intent);
+            }
         } else {
             showSnackbar(R.string.no_internet_connection);
         }
@@ -133,16 +141,17 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
     private class WebsiteItemModelErrorsObserver implements Observer<WebsiteItemModel> {
         @Override
         public void onChanged(@Nullable WebsiteItemModel websiteItemModel) {
-            if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_NO_DATA_FOUND) {
-                showProgressBar(false);
-                showEmptyTextView();
-            }
-            if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR) {
+            if (websiteItemModel.getResultStatus() == ResultStatus.REQUEST_NO_DATA_FOUND) {
                 showProgressBar(false);
                 showEmptyTextView();
                 showSnackbar(R.string.cannot_find_items_msg);
             }
-            if (websiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_PARSING_ERROR) {
+            if (websiteItemModel.getResultStatus() == ResultStatus.REQUEST_PARSING_ERROR) {
+                showProgressBar(false);
+                showEmptyTextView();
+                showSnackbar(R.string.cannot_find_items_msg);
+            }
+            if (websiteItemModel.getResultStatus() == ResultStatus.REQUEST_NETWORK_ERROR) {
                 showProgressBar(false);
                 showEmptyTextView();
                 showSnackbar(R.string.general_error_msg);

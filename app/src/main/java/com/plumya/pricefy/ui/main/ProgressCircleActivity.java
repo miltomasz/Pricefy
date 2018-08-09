@@ -2,6 +2,7 @@ package com.plumya.pricefy.ui.main;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -41,7 +42,8 @@ import butterknife.ButterKnife;
 
 public class ProgressCircleActivity extends AppCompatActivity {
 
-    private static final String CLOUD_VISION_API_KEY = "";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyDcusOmzydK7WdJS3pONSnCPL67KkB5pow";
+    public static final String MESSAGE_INFO = "messageInfo";
     public static final String PROCESSING_RESULT = "processedResult";
     public static final String IMAGE_ID = "imageId";
     public static final String LOG_TAG = ProgressCircleActivity.class.getSimpleName();
@@ -55,6 +57,9 @@ public class ProgressCircleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progress_circle);
         ButterKnife.bind(this);
+
+        // progress circle activity should run just in portrait mode
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         repository = Injector.provideRepository(getApplicationContext());
 
@@ -157,6 +162,7 @@ public class ProgressCircleActivity extends AppCompatActivity {
             super.onPostExecute(imageId);
             Intent processedDataIntent = new Intent();
             if (imageId == null || imageId == -1) {
+                processedDataIntent.putExtra(MESSAGE_INFO, R.string.could_not_take_pic_error);
                 activity.setResult(ProgressCircleActivity.RESULT_CANCELED);
             } else {
                 processedDataIntent.putExtra(IMAGE_ID, imageId);

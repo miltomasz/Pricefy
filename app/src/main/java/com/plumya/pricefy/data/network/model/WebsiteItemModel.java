@@ -14,14 +14,6 @@ public class WebsiteItemModel {
         this.resultStatus = resultStatus;
     }
 
-    public interface ResultStatus {
-        int REQUEST_OK = 1;
-        int REQUEST_NO_DATA_FOUND = 2;
-        int REQUEST_PARSING_ERROR = 3;
-        int REQUEST_NETWORK_ERROR = 4;
-        int UNKNOWN_ERROR = 5;
-    }
-
     public List<WebsiteItem> getWebsiteItems() {
         return websiteItems;
     }

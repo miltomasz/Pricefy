@@ -15,4 +15,9 @@ public class LinkUtil {
             return AMAZON_BASE_URI;
         }
     }
+
+    public static String secureParams(String params) {
+        if (params == null) return "";
+        return params.replace(" ", "+");
+    }
 }

@@ -5,7 +5,7 @@ android {
         config {
             keyAlias 'PricefyKey'
             keyPassword 'udacitypricefy99'
-            storeFile file('pricefy.jks')
+            storeFile file("${rootDir}/pricefy.jks")
             storePassword 'udacitypricefy99'
         }
     }
@@ -20,9 +20,13 @@ android {
     }
     buildTypes {
         release {
+            buildConfigField "Boolean", "DEBUG_MODE", "false"
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.config
+        }
+        debug {
+            buildConfigField "Boolean", "DEBUG_MODE", "true"
         }
     }
     configurations.all {
@@ -59,19 +63,13 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation "com.jakewharton:butterknife:$rootProject.butterKnifeVersion"
     annotationProcessor "com.jakewharton:butterknife-compiler:$rootProject.butterKnifeVersion"
-    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-gson:$rootProject.retrofitVersion"
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1'
     implementation 'org.jsoup:jsoup:1.11.3'
 
-    // Local db
+    // Local db client
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
 
     // Google Vision API dependencies
     implementation 'com.google.api-client:google-api-client-android:1.23.0' exclude module: 'httpclient'
     implementation 'com.google.http-client:google-http-client-gson:1.23.0' exclude module: 'httpclient'
     implementation 'com.google.apis:google-api-services-vision:v1-rev387-1.23.0'
-
-    // Test dependencies
-    testImplementation 'junit:junit:4.12'
 }

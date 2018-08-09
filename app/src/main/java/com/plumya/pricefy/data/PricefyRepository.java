@@ -12,6 +12,7 @@ import com.plumya.pricefy.data.local.WebsiteItemDao;
 import com.plumya.pricefy.data.local.model.Image;
 import com.plumya.pricefy.data.local.model.WebsiteItem;
 import com.plumya.pricefy.data.network.AmazonNetworkDaraSource;
+import com.plumya.pricefy.data.network.NetworkDataSource;
 import com.plumya.pricefy.data.network.model.WebsiteItemModel;
 import com.plumya.pricefy.ui.results.SingleLiveEvent;
 import com.plumya.pricefy.utils.AppExecutors;
@@ -203,7 +204,7 @@ public class PricefyRepository {
         @Override
         public void onChanged(@Nullable WebsiteItemModel newWebsiteItemModel) {
             executors.diskIO().execute(() -> {
-                if (newWebsiteItemModel.getResultStatus() == WebsiteItemModel.ResultStatus.REQUEST_OK) {
+                if (newWebsiteItemModel.getResultStatus() == NetworkDataSource.ResultStatus.REQUEST_OK) {
                     final WebsiteItemsDiffCallback diffCallback =
                             new WebsiteItemsDiffCallback(websiteItems.getValue(), newWebsiteItemModel.getWebsiteItems());
 

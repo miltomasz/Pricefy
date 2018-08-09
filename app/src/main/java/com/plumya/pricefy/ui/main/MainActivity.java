@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements ImagesAdapter.Ima
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PROCESSING = 2;
     private static final int REQUEST_CAMERA_PERMISSION = 10;
+    private static final String CURRENT_PHOTO_PATH = "currentPhotoPath";
 
     private String currentPhotoPath;
     private MainActivityViewModel viewModel;
@@ -159,8 +160,10 @@ public class MainActivity extends AppCompatActivity implements ImagesAdapter.Ima
                 } else {
                     showSnackbar(R.string.no_internet_connection);
                 }
-            } else {
-                showSnackbar(R.string.could_not_take_pic_error);
+            } else if (resultCode == RESULT_CANCELED) {
+                if (data.hasExtra(ProgressCircleActivity.MESSAGE_INFO)) {
+                    showSnackbar(data.getIntExtra(ProgressCircleActivity.MESSAGE_INFO, R.string.general_error_msg));
+                }
             }
         } else if (requestCode == REQUEST_IMAGE_PROCESSING) {
             if (resultCode == RESULT_OK) {
@@ -188,6 +191,18 @@ public class MainActivity extends AppCompatActivity implements ImagesAdapter.Ima
                 }
             }
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(CURRENT_PHOTO_PATH, currentPhotoPath);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        currentPhotoPath = savedInstanceState.getString(CURRENT_PHOTO_PATH);
     }
 
     private void launchCamera() {
