@@ -2,6 +2,7 @@ package com.plumya.pricefy.ui.results;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -64,6 +65,7 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
                 .centerCrop()
                 .error(R.drawable.ic_baseline_photo_camera_24px)
                 .into(holder.imageView);
+        ViewCompat.setTransitionName(holder.imageView, String.valueOf(websiteItem.getId()));
     }
 
     @Override
@@ -97,11 +99,11 @@ public class ResultsAdapter extends RecyclerView.Adapter<ResultsAdapter.ViewHold
         public void onClick(View v) {
             int position = getAdapterPosition();
             WebsiteItem websiteItem = websiteItems.get(position);
-            clickHandler.onClick(websiteItem);
+            clickHandler.onClick(websiteItem, imageView);
         }
     }
 
     public interface WebsiteItemOnClickHandler {
-        void onClick(WebsiteItem websiteItem);
+        void onClick(WebsiteItem websiteItem, ImageView imageView);
     }
 }

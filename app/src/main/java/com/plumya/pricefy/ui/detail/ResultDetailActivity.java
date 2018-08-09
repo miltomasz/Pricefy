@@ -4,6 +4,7 @@ import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -73,6 +74,10 @@ public class ResultDetailActivity extends AppCompatActivity {
         initializeToolbar();
         initializeAppBarLayout();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            imageView.setTransitionName(getImageTransitionName());
+        }
+
         long itemId = getItemId();
         String websiteItemUri = getItemDetailsUri();
 
@@ -91,6 +96,11 @@ public class ResultDetailActivity extends AppCompatActivity {
     private long getItemId() {
         Intent intent = getIntent();
         return intent.getLongExtra(ResultsActivity.ITEM_ID, -1);
+    }
+
+    private String getImageTransitionName() {
+        Intent intent = getIntent();
+        return intent.getStringExtra(ResultsActivity.IMAGE_TRANSITION_NAME);
     }
 
     private void initializeToolbar() {
@@ -182,10 +192,12 @@ public class ResultDetailActivity extends AppCompatActivity {
                             @Override
                             public void onSuccess() {
                                 picassoProgressBar.setVisibility(View.GONE);
+                                supportStartPostponedEnterTransition();
                             }
 
                             @Override
                             public void onError(Exception e) {
+                                supportStartPostponedEnterTransition();
                             }
                         });
                 mainTitleTv.setText(websiteItem.getMainTitle());

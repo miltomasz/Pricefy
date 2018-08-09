@@ -1,6 +1,5 @@
 package com.plumya.pricefy.ui.results;
 
-import android.app.ActivityOptions;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -8,6 +7,8 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -40,6 +42,7 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
     public static final String LOG_TAG = ResultsActivity.class.getSimpleName();
     public static final String ITEM_ID = "websiteItemId";
     public static final String ITEM_DETAILS_URI = "itemDetailsUri";
+    public static final String IMAGE_TRANSITION_NAME = "imageTransitionName";
 
     private ResultsAdapter resultsAdapter;
     private ResultsActivityViewModel viewModel;
@@ -112,18 +115,19 @@ public class ResultsActivity extends AppCompatActivity implements ResultsAdapter
     }
 
     @Override
-    public void onClick(WebsiteItem websiteItem) {
+    public void onClick(WebsiteItem websiteItem, ImageView imageView) {
         if (NetworkUtil.isNetworkAvailable(this)) {
             Log.d(LOG_TAG, "Tapping item: " + websiteItem.getMainTitle());
             Intent intent = new Intent(this, ResultDetailActivity.class);
             intent.putExtra(ITEM_ID, websiteItem.getId());
             intent.putExtra(ITEM_DETAILS_URI, websiteItem.getDetailsUri());
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                Bundle bundle = ActivityOptions.makeSceneTransitionAnimation(this).toBundle();
-                startActivity(intent, bundle);
-            } else {
-                startActivity(intent);
-            }
+            intent.putExtra(IMAGE_TRANSITION_NAME, ViewCompat.getTransitionName(imageView));
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                    this,
+                    imageView,
+                    ViewCompat.getTransitionName(imageView)
+            );
+            startActivity(intent, options.toBundle());
         } else {
             showSnackbar(R.string.no_internet_connection);
         }
